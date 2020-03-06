@@ -55,11 +55,10 @@ SELECT nomClient
 FROM Clients c
 WHERE villeClient = 'Montpellier'
 AND NOT EXISTS(
-	SELECT idClient
+	SELECT idClient AS pasDeService
 	FROM (Locations l JOIN (
-		SELECT idBungalow
+		SELECT idBungalow AS b
 		FROM Bungalows
-		WHERE idBungalow NOT IN(SELECT idBungalow FROM Proposer)) b
-		ON l.idBungalow = b.idBungalow 
-		AS pasDeService)
+		WHERE idBungalow NOT IN(SELECT idBungalow FROM Proposer))
+		ON l.idBungalow = b.idBungalow)
 	WHERE c.idClient = pasDeService.idClient);

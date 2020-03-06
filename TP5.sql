@@ -72,3 +72,48 @@ WHERE idBungalow IN(
 	GROUP BY idBungalow, dateFin, dateDebut
 	HAVING dateFin > '01-06-2017'
 	AND dateDebut < '30-06-2017');
+
+
+
+
+--R70
+SELECT nomBungalow
+FROM Bungalows b 
+JOIN Proposer p ON b.idBungalow = p.idBungalow
+GROUP BY b.idBungalow, nomBungalow
+HAVING COUNT(idService) = (SELECT COUNT(*) FROM Services);
+
+--R70 but cooler
+
+SELECT nomBungalow
+FROM Bungalows b
+WHERE NOT EXISTS (
+	SELECT idService
+	FROM Services s
+	MINUS
+	SELECT idService
+	FROM Proposer p
+	WHERE p.idBungalow = b.idBungalow);
+
+--R71
+SELECT nomBungalow 
+FROM Bungalows b
+JOIN Proposer p ON b.idBungalow = p.idBungalow
+JOIN Services s ON s.idService = p.idService
+WHERE categorieService = 'Luxe'
+GROUP BY b.idBungalow, nomBungalow
+HAVING COUNT(*) = (SELECT COUNT(*)
+	FROM Services
+	WHERE categorieService = 'Luxe');
+
+--R71 but cooler
+SELECT nomBungalow
+FROM Bungalows b
+WHERE NOT EXISTS (
+	SELECT idService
+	FROM Services
+	WHERE categorieService = 'Luxe'
+	MINUS 
+	SELECT idService
+	FROM Proposer p
+	WHERE p.idBungalow = b.idBungalow);
