@@ -63,7 +63,7 @@ WHERE villeClient IN(
 
 --R18
 
-SELECT COUNT(DISTINCT idService) AS nb_de_services
+SELECT COUNT(DISTINCT idService) AS nbDeSservices
 FROM Proposer p JOIN Bungalows b on p.idBungalow = b.idBungalow
 WHERE nomBungalow = 'Le Titanic';
 
@@ -455,7 +455,7 @@ JOIN Services s ON s.idService = p.idService
 GROUP BY b.idBungalow, nomBungalow
 HAVING COUNT( DISTINCT categorieService) = (SELECT COUNT(DISTINCT categorieService) FROM Services);
 
---R89
+--R89 PAS BON
 
 SELECT nomBungalow
 FROM Bungalows b
@@ -478,3 +478,46 @@ WHERE idService IN(
 	FROM Bungalows b
 	JOIN Proposer p ON b.idBungalow = p.idBungalow
 		WHERE nomBungalow = 'La Suite Régalienne');
+--Ca marche aps non plus...
+SELECT nomBungalow
+FROM Bungalows b
+JOIN Proposer p ON p.idBungalow = b.idBungalow
+WHERE NOT EXISTS(
+	SELECT idService
+	FROM Proposer p 
+	JOIN Bungalows b ON b.idBungalow = p.idBungalow
+	MINUS
+	SELECT idService
+	FROM Proposer p 
+	JOIN Bungalows b ON b.idBungalow = p.idBungalow
+	AND nomBungalow = 'La Suite Régalienne');
+
+
+--R90
+
+SELECT nomService, COUNT(b.idBungalow) AS nbBungalows
+FROM Services s
+JOIN Proposer p ON p.idService = s.idService
+LEFT JOIN Bungalows b ON p.idBungalow = b.idBungalow
+AND b.idBungalow IN(
+	SELECT b.idBungalow
+	FROM Bungalows b
+	JOIN Proposer p ON b.idBungalow = p.idBungalow
+	GROUP BY b.idBungalow
+	HAVING COUNT(idService)=1)
+GROUP BY s.idService, nomService;
+
+--R91
+
+SELECT nomCamping, nomBungalow
+FROM Campings c
+JOIN Bungalows b ON b.idCamping = c.idCamping
+WHERE idBungalow IN(
+	SELECT b.idBungalow
+	FROM Bungalows b
+	JOIN Proposer p ON b.idBungalow = p.idBungalow
+	GROUP BY b.idCamping, b.idBungalow
+	HAVING COUNT(idService) = (SELECT MAX(COUNT(idService))
+			FROM Bungalows b
+			JOIN Proposer p ON b.idBungalow = p.idBungalow
+			GROUP BY b.idCamping));
